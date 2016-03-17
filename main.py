@@ -4,9 +4,9 @@ Config.set('graphics', 'fullscreen', '0')
 
 from kivy.app import App
 from kivy.lang import Builder
+from kivy.uix.button import Button
 from kivy.uix.widget import Widget
 from kivy.core.audio import SoundLoader
-from kivy.uix.togglebutton import ToggleButton
 
 from os import listdir
 
@@ -59,29 +59,34 @@ class MusicPlayer(Widget):
     def getSongs(self):
 
         songs = [] #List to hold songs from music directory
+        nowPlaying = '' #Song that is currently playing
         directory = self.ids.direct.text #Directory entered by the user
+
+        #To make sure that the directory ends with a '/'
+        if not directory.endswith('/'):
+            directory += '/'
 
         self.ids.scroll.bind(minimum_height=self.ids.scroll.setter('height'))
 
         #get mp3 files from directory
         for fil in listdir(directory):
             if fil.endswith('.mp3'):
-                songs.append(directory+fil)
+                songs.append(fil)
                 
         songs.sort()
 
         for song in songs:
 
             def playSong(self):
-                sound = SoundLoader.load(directory+self.text)
-                if self.state == 'down':
-                    sound.play()
-                else:
-                    sound.stop()
+                try:
+                    nowPlaying.stop()
+                except:
+                    pass
+                finally:
+                    nowPlaying = SoundLoader.load(directory+self.text)
+                    nowPlaying.play()
                 
-            news = song.replace(directory,'') #song name
-            btn = ToggleButton(text=news, size_hint_y=None, height=40)
-            btn.bind(on_press=playSong)
+            btn = Button(text=song, size_hint_y=None, height=40, on_press=playSong)
 
             #Color Buttons Alternatively
             if songs.index(song)%2 == 0:
