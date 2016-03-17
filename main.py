@@ -40,17 +40,17 @@ Builder.load_string('''
         pos: 0, 50
         size: root.width, 50
         Button:
-            text: '<='
+            text: '<--'
             background_color: 0,.5,1,1
         Button:
             text: '||'
             background_color: 0,.5,1,1
         Button:
-            text: '=>'
+            text: '-->'
             background_color: 0,.5,1,1
     Button:
         id: nowplay
-        text: ''
+        text: 'Now Playing'
         pos: 0,0
         size: root.width, 50
         background_color: 0,.5,1,1
