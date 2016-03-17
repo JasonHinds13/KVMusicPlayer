@@ -28,7 +28,7 @@ Builder.load_string('''
     ScrollView:
         size_hint: None, None
         size: root.width, root.height-50
-        pos_hint:{'center_x':.5, 'center_y':.5}
+        pos_hint:{'center_x':.1, 'center_y':.1}
         GridLayout:
             id: scroll
             cols: 1
@@ -37,19 +37,23 @@ Builder.load_string('''
 
     GridLayout:
         rows: 1
+        pos: 0, 50
         size: root.width, 50
-        Button:
-            id: nowplay
-            background_color: 0,.5,1,1
         Button:
             text: '<='
             background_color: 0,.5,1,1
         Button:
-            text: '[ ]'
+            text: '||'
             background_color: 0,.5,1,1
         Button:
             text: '=>'
             background_color: 0,.5,1,1
+    Button:
+        id: nowplay
+        text: ''
+        pos: 0,0
+        size: root.width, 50
+        background_color: 0,.5,1,1
             
 
 ''')
@@ -77,14 +81,15 @@ class MusicPlayer(Widget):
 
         for song in songs:
 
-            def playSong(self):
+            def playSong(bt):
                 try:
                     nowPlaying.stop()
                 except:
                     pass
                 finally:
-                    nowPlaying = SoundLoader.load(directory+self.text)
-                    nowPlaying.play()
+                    nowPlaying = SoundLoader.load(directory+bt.text)
+                    #nowPlaying.play()
+                    self.ids.nowplay.text = bt.text
                 
             btn = Button(text=song, size_hint_y=None, height=40, on_press=playSong)
 
