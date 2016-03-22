@@ -4,11 +4,14 @@ Config.set('graphics', 'fullscreen', '0')
 
 from kivy.app import App
 from kivy.lang import Builder
+from kivy.uix.popup import Popup
 from kivy.uix.button import Button
 from kivy.uix.widget import Widget
 from kivy.core.audio import SoundLoader
+from kivy.properties import ObjectProperty
+from kivy.uix.floatlayout import FloatLayout
 
-from os import listdir
+from os import listdir, path
 
 Builder.load_string('''
 <MusicPlayer>:
@@ -17,9 +20,10 @@ Builder.load_string('''
         id: direct
         pos: 0,root.top-50
         size: root.width-200,50
-        hint_text: 'Enter File Location'
+        hint_text: 'Enter File Location or Leave Empty to Browse'
     Button:
-        text: 'Scan'
+        id: searchBtn
+        text: 'Search'
         size: 200,50
         background_color: 0,.5,1,1
         pos: root.width-200, root.top-50
@@ -54,52 +58,111 @@ Builder.load_string('''
         pos: 0,0
         size: root.width, 50
         background_color: 0,.5,1,1
+
+    Label:
+        id: status
+        text: ''
+        center: root.center
+
+<ChooseFile>:
+    BoxLayout:
+        size: root.size
+        pos: root.pos
+        orientation: "vertical"
+        FileChooserIconView:
+            id: filechooser
+
+        BoxLayout:
+            size_hint_y: None
+            height: 30
+            Button:
+                text: "Cancel"
+                on_release: root.cancel()
+
+            Button:
+                text: "Select Folder"
+                on_release: root.select(filechooser.path)
             
 
 ''')
 
+class ChooseFile(FloatLayout):
+    select = ObjectProperty(None)
+    cancel = ObjectProperty(None)
+
 class MusicPlayer(Widget):
+
+    directory = ''
+
+    def dismiss_popup(self):
+        self._popup.dismiss()
+
+    def fileSelect(self):
+        content = ChooseFile(select=self.select,
+                             cancel=self.dismiss_popup)
+        
+        self._popup = Popup(title="Select Folder", content=content,
+                            size_hint=(0.9, 0.9))
+        self._popup.open()
+
+    def select(self, path):
+        self.directory = path
+        self.ids.direct.text = self.directory
+        self.ids.searchBtn.text = "Scan"
+        self.dismiss_popup()
 
     def getSongs(self):
 
         songs = [] #List to hold songs from music directory
-        nowPlaying = '' #Song that is currently playing
-        directory = self.ids.direct.text #Directory entered by the user
+        self.directory = self.ids.direct.text #Directory entered by the user
+
+        if self.directory == '':
+            self.fileSelect()
 
         #To make sure that the directory ends with a '/'
-        if not directory.endswith('/'):
-            directory += '/'
+        if not self.directory.endswith('/'):
+            self.directory += '/'
 
-        self.ids.scroll.bind(minimum_height=self.ids.scroll.setter('height'))
+        #Check if directory exists
+        if not path.exists(self.directory):
+            self.ids.status.text = 'Folder Not Found'
+            self.ids.status.color = (1,0,0,1)
 
-        #get mp3 files from directory
-        for fil in listdir(directory):
-            if fil.endswith('.mp3'):
-                songs.append(fil)
-                
-        songs.sort()
+        else:
 
-        for song in songs:
+            self.ids.status.text = ''
 
-            def playSong(bt):
-                try:
-                    nowPlaying.stop()
-                except:
-                    pass
-                finally:
-                    nowPlaying = SoundLoader.load(directory+bt.text)
-                    #nowPlaying.play()
-                    self.ids.nowplay.text = bt.text
-                
-            btn = Button(text=song, size_hint_y=None, height=40, on_press=playSong)
+            self.ids.scroll.bind(minimum_height=self.ids.scroll.setter('height'))
 
-            #Color Buttons Alternatively
-            if songs.index(song)%2 == 0:
-                btn.background_color=(0,0,1,1)
-            else:
-                btn.background_color=(0,0,2,1)
-                
-            self.ids.scroll.add_widget(btn) #Add each to scrollview
+            #get mp3 files from directory
+            for fil in listdir(self.directory):
+                if fil.endswith('.mp3'):
+                    songs.append(fil)
+                    
+            songs.sort()
+
+            for song in songs:
+
+                def playSong(bt):
+                    nowPlaying = '' #Song that is currently playing
+                    try:
+                        nowPlaying.stop()
+                    except:
+                        pass
+                    finally:
+                        nowPlaying = SoundLoader.load(self.directory+song)
+                        #nowPlaying.play()
+                        self.ids.nowplay.text = bt.text
+                    
+                btn = Button(text=song[:-4], size_hint_y=None, height=40, on_press=playSong)
+
+                #Color Buttons Alternatively
+                if songs.index(song)%2 == 0:
+                    btn.background_color=(0,0,1,1)
+                else:
+                    btn.background_color=(0,0,2,1)
+                    
+                self.ids.scroll.add_widget(btn) #Add each to scrollview
     
 class KVMusicApp(App):
     
