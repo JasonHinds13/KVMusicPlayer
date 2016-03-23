@@ -18,21 +18,21 @@ Builder.load_string('''
     
     TextInput:
         id: direct
-        pos: 0,root.top-50
-        size: root.width-200,50
+        pos: 0,root.top-35
+        size: root.width-200,35
         hint_text: 'Enter File Location or Leave Empty to Browse'
     Button:
         id: searchBtn
-        text: 'Search'
-        size: 200,50
+        text: 'Browse'
+        size: 200,35
         background_color: 0,.5,1,1
-        pos: root.width-200, root.top-50
+        pos: root.width-200, root.top-35
         on_release: root.getSongs()
 
     ScrollView:
         size_hint: None, None
-        size: root.width, root.height-50
-        pos_hint:{'center_x':.1, 'center_y':.1}
+        size: root.width, root.height-135
+        pos: 0, 100
         GridLayout:
             id: scroll
             cols: 1
@@ -92,7 +92,8 @@ class ChooseFile(FloatLayout):
 
 class MusicPlayer(Widget):
 
-    directory = ''
+    directory = '' #location of songs folder
+    nowPlaying = '' #Song that is currently playing
 
     def dismiss_popup(self):
         self._popup.dismiss()
@@ -138,20 +139,23 @@ class MusicPlayer(Widget):
             for fil in listdir(self.directory):
                 if fil.endswith('.mp3'):
                     songs.append(fil)
+
+            #if songs == []:
+                #self.ids.status.text = 'No Music Found In Folder'
+                #self.ids.status.color = (1,0,0,1)
                     
             songs.sort()
 
             for song in songs:
 
                 def playSong(bt):
-                    nowPlaying = '' #Song that is currently playing
                     try:
-                        nowPlaying.stop()
+                        self.nowPlaying.stop()
                     except:
                         pass
                     finally:
-                        nowPlaying = SoundLoader.load(self.directory+song)
-                        #nowPlaying.play()
+                        self.nowPlaying = SoundLoader.load(self.directory+song)
+                        self.nowPlaying.play()
                         self.ids.nowplay.text = bt.text
                     
                 btn = Button(text=song[:-4], size_hint_y=None, height=40, on_press=playSong)
