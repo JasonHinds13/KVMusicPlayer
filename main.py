@@ -110,6 +110,7 @@ class MusicPlayer(Widget):
         self.directory = path
         self.ids.direct.text = self.directory
         self.ids.searchBtn.text = "Scan"
+        self.getSongs()
         self.dismiss_popup()
 
     def getSongs(self):
