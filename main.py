@@ -15,6 +15,13 @@ from os import listdir, path
 
 Builder.load_string('''
 <MusicPlayer>:
+
+    canvas.before:
+        Color:
+            rgba: 0, 0, .1, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
     
     TextInput:
         id: direct
@@ -77,10 +84,12 @@ Builder.load_string('''
             height: 30
             Button:
                 text: "Cancel"
+                background_color: 0,.5,1,1
                 on_release: root.cancel()
 
             Button:
                 text: "Select Folder"
+                background_color: 0,.5,1,1
                 on_release: root.select(filechooser.path)
             
 
@@ -140,7 +149,7 @@ class MusicPlayer(Widget):
             for fil in listdir(self.directory):
                 if fil.endswith('.mp3'):
                     songs.append(fil)
-                    
+
             #If there are no playable sound files in the chosen directory
             if songs == [] and self.directory != '':
                 self.ids.status.text = 'No Music Found In Folder'
@@ -157,7 +166,7 @@ class MusicPlayer(Widget):
                         pass
                     finally:
                         self.nowPlaying = SoundLoader.load(self.directory+song)
-                        self.nowPlaying.play()
+                        #self.nowPlaying.play()
                         self.ids.nowplay.text = bt.text
                     
                 btn = Button(text=song[:-4], size_hint_y=None, height=40, on_press=playSong)
