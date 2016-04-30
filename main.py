@@ -75,6 +75,13 @@ Builder.load_string('''
         center: root.center
 
 <ChooseFile>:
+
+    canvas.before:
+        Color:
+            rgba: 0, 0, .4, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
     BoxLayout:
         size: root.size
         pos: root.pos
