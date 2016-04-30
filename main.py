@@ -8,6 +8,7 @@ from kivy.uix.popup import Popup
 from kivy.uix.button import Button
 from kivy.uix.widget import Widget
 from kivy.core.audio import SoundLoader
+from kivy.uix.gridlayout import GridLayout
 from kivy.properties import ObjectProperty
 from kivy.uix.floatlayout import FloatLayout
 
@@ -42,9 +43,11 @@ Builder.load_string('''
         pos: 0, 100
         GridLayout:
             id: scroll
-            cols: 1
+            cols: 2
             spacing: 10
             size_hint_y: None
+            row_force_default: True
+            row_default_height: 40
 
     GridLayout:
         rows: 1
@@ -104,6 +107,21 @@ class MusicPlayer(Widget):
     directory = '' #location of songs folder
     nowPlaying = '' #Song that is currently playing
 
+    def getpath(self):
+        try:
+            f = open("sav.dat","r")
+            self.ids.direct.text = str(f.readline())
+            f.close()
+            self.ids.searchBtn.text = "Scan"
+            self.getSongs()
+        except:
+            self.ids.direct.text = ''
+            
+    def savepath(self, path):
+        f = open("sav.dat","w")
+        f.write(path)
+        f.close()
+
     def dismiss_popup(self):
         self._popup.dismiss()
 
@@ -119,6 +137,7 @@ class MusicPlayer(Widget):
         self.directory = path
         self.ids.direct.text = self.directory
         self.ids.searchBtn.text = "Scan"
+        self.savepath(self.directory)
         self.getSongs()
         self.dismiss_popup()
 
@@ -152,7 +171,7 @@ class MusicPlayer(Widget):
 
             #If there are no playable sound files in the chosen directory
             if songs == [] and self.directory != '':
-                self.ids.status.text = 'No Music Found In Folder'
+                self.ids.status.text = 'No Music Found'
                 self.ids.status.color = (1,0,0,1)
                     
             songs.sort()
@@ -165,11 +184,12 @@ class MusicPlayer(Widget):
                     except:
                         pass
                     finally:
-                        self.nowPlaying = SoundLoader.load(self.directory+song)
-                        #self.nowPlaying.play()
+                        self.nowPlaying = SoundLoader.load(self.directory+bt.text+'.mp3')
+                        self.nowPlaying.play()
                         self.ids.nowplay.text = bt.text
                     
-                btn = Button(text=song[:-4], size_hint_y=None, height=40, on_press=playSong)
+                btn = Button(text=song[:-4], on_press=playSong)
+                icon = Button(size_hint_x=None, width=50, background_down="ico.png", background_normal="ico.png")
 
                 #Color Buttons Alternatively
                 if songs.index(song)%2 == 0:
@@ -177,12 +197,15 @@ class MusicPlayer(Widget):
                 else:
                     btn.background_color=(0,0,2,1)
                     
-                self.ids.scroll.add_widget(btn) #Add each to scrollview
+                self.ids.scroll.add_widget(icon) #Add icon to layout
+                self.ids.scroll.add_widget(btn) #Add btn to layout
     
 class KVMusicApp(App):
     
     def build(self):
-        return MusicPlayer()
+        music = MusicPlayer()
+        music.getpath()
+        return music
         
     def on_pause(self):
         return True
