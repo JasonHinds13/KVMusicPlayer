@@ -176,7 +176,7 @@ class MusicPlayer(Widget):
                 if fil.endswith('.mp3'):
                     songs.append(fil)
 
-            #If there are no playable sound files in the chosen directory
+            #If there are no mp3 files in the chosen directory
             if songs == [] and self.directory != '':
                 self.ids.status.text = 'No Music Found'
                 self.ids.status.color = (1,0,0,1)
